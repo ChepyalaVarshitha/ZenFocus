@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow - Smart Study Timer & Task Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#6366F1',
+                        accent: '#10B981',
+                        dark: '#1E293B',
+                        light: '#F8FAFC'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen">
+    <!-- @COMPONENT: Header -->
+    <header class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-clock text-white text-lg"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">StudyFlow</h1>
+                </div>
+                
+                <nav class="hidden md:flex items-center space-x-8">
+                    <button class="nav-btn text-gray-700 hover:text-primary transition-colors" data-tab="home">Home</button>
+                    <button class="nav-btn text-gray-700 hover:text-primary transition-colors" data-tab="tasks">Tasks</button>
+                    <button class="nav-btn text-gray-700 hover:text-primary transition-colors" data-tab="notes">Notes</button>
+                    <button class="nav-btn text-gray-700 hover:text-primary transition-colors" data-tab="faq">FAQ</button>
+                    <button class="nav-btn text-gray-700 hover:text-primary transition-colors" data-tab="contact">Contact</button>
+                </nav>
+
+                <div class="flex items-center space-x-4">
+                    <div id="profile-section" class="flex items-center space-x-3">
+                        <div id="profile-icon" class="w-8 h-8 bg-gray-300 rounded-full cursor-pointer hidden items-center justify-center hover:bg-gray-400 transition-colors">
+                            <i class="fas fa-user text-sm text-gray-600"></i>
+                        </div>
+                        <button id="login-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                            Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <!-- @COMPONENT: ProfileSidebar -->
+    <div id="profile-sidebar" class="fixed right-0 top-16 w-80 h-full bg-white shadow-xl transform translate-x-full transition-transform z-40 border-l border-gray-100">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900">Profile</h3>
+                <button id="close-sidebar" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-3">
+                <button class="profile-nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-3" data-profile-tab="skills">
+                    <i class="fas fa-star text-accent"></i>
+                    <span>Skills</span>
+                </button>
+                <button class="profile-nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-3" data-profile-tab="achievements">
+                    <i class="fas fa-trophy text-yellow-500"></i>
+                    <span>Achievements</span>
+                </button>
+                <button class="profile-nav-btn w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-3" data-profile-tab="progress">
+                    <i class="fas fa-chart-line text-primary"></i>
+                    <span>Progress</span>
+                </button>
+                <button id="logout-btn" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-50 transition-colors flex items-center space-x-3 text-red-600">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: ProfileSidebar -->
+
+    <!-- @COMPONENT: AuthModal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome to StudyFlow</h2>
+                <p class="text-gray-600">Sign in to access your personalized study dashboard</p>
+            </div>
+            
+            <div class="space-y-4">
+                <button id="google-signin" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 flex items-center justify-center space-x-3 hover:bg-gray-50 transition-colors">
+                    <i class="fab fa-google text-red-500"></i>
+                    <span class="font-medium">Continue with Google</span>
+                </button>
+                
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Or continue with email</span>
+                    </div>
+                </div>
+                
+                <form id="auth-form">
+                    <div class="space-y-4">
+                        <input type="email" placeholder="Email address" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <input type="password" placeholder="Password" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium">
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+                
+                <p class="text-center text-sm text-gray-600">
+                    Don't have an account? <button class="text-primary hover:underline">Sign up</button>
+                </p>
+            </div>
+            
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: AuthModal -->
+
+    <!-- @COMPONENT: MainContent -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- @COMPONENT: HomeTab -->
+        <div id="home-tab" class="tab-content">
+            <!-- Hero Section -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                    Master Your Study Sessions
+                </h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Boost productivity with our advanced pomodoro timer, task management, and progress tracking
+                </p>
+            </div>
+
+            <!-- Timer Section -->
+            <div class="max-w-2xl mx-auto mb-12">
+                <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                    <!-- Modern study workspace with clean desk, laptop, notebooks, and natural lighting -->
+                    <div class="text-center mb-8 relative overflow-hidden rounded-xl">
+                        <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400" 
+                             alt="Clean study workspace" class="w-full h-48 object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                    </div>
+                    
+                    <div class="text-center mb-8">
+                        <div id="timer-display" class="text-6xl md:text-7xl font-bold text-gray-800 mb-4" data-mock="true">25:00</div>
+                        <div id="timer-mode" class="text-lg text-gray-600 mb-6">Focus Time</div>
+                        
+                        <div class="flex items-center justify-center space-x-4 mb-6">
+                            <button id="timer-set" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors flex items-center space-x-2">
+                                <i class="fas fa-cog"></i>
+                                <span>Set</span>
+                            </button>
+                            <button id="timer-start" class="bg-accent hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center space-x-2">
+                                <i class="fas fa-play"></i>
+                                <span>Start</span>
+                            </button>
+                            <button id="timer-pause" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 hidden">
+                                <i class="fas fa-pause"></i>
+                                <span>Pause</span>
+                            </button>
+                            <button id="timer-stop" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2">
+                                <i class="fas fa-stop"></i>
+                                <span>End</span>
+                            </button>
+                        </div>
+                        
+                        <div class="flex justify-center space-x-2">
+                            <button class="timer-preset px-3 py-1 text-sm bg-primary text-white rounded-full" data-minutes="25">25m</button>
+                            <button class="timer-preset px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors" data-minutes="15">15m</button>
+                            <button class="timer-preset px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors" data-minutes="45">45m</button>
+                            <button class="timer-preset px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors" data-minutes="60">60m</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-primary/10 rounded-lg">
+                            <i class="fas fa-clock text-primary text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600">Focus Time Today</p>
+                            <p class="text-2xl font-bold text-gray-900" data-mock="true">2h 30m</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-accent/10 rounded-lg">
+                            <i class="fas fa-check-circle text-accent text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600">Tasks Completed</p>
+                            <p class="text-2xl font-bold text-gray-900" data-mock="true">8</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-secondary/10 rounded-lg">
+                            <i class="fas fa-fire text-secondary text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600">Streak</p>
+                            <p class="text-2xl font-bold text-gray-900" data-mock="true">12 days</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: HomeTab -->
+
+        <!-- @COMPONENT: TasksTab -->
+        <div id="tasks-tab" class="tab-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900">Task Management</h2>
+                    <button id="add-task-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Task</span>
+                    </button>
+                </div>
+                
+                <!-- Add Task Form -->
+                <div id="add-task-form" class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 hidden">
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Task Name</label>
+                            <input type="text" id="task-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter task name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
+                            <select id="task-difficulty" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button type="submit" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">Add Task</button>
+                            <button type="button" id="cancel-task" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Tasks List -->
+                <div class="space-y-4">
+                    <!-- @MAP: tasks.map(task => ( -->
+                    <div class="task-item bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between" data-mock="true">
+                        <div class="flex items-center space-x-4">
+                            <input type="checkbox" class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary">
+                            <div>
+                                <h3 class="font-medium text-gray-900" data-bind="task.name">Complete JavaScript Tutorial</h3>
+                                <div class="flex items-center space-x-2 mt-1">
+                                    <span class="difficulty-badge px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800" data-bind="task.difficulty">Medium</span>
+                                    <span class="text-sm text-gray-500" data-bind="task.createdAt">2 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="delete-task text-red-500 hover:text-red-700 p-2">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="task-item bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between" data-mock="true">
+                        <div class="flex items-center space-x-4">
+                            <input type="checkbox" class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary" checked>
+                            <div>
+                                <h3 class="font-medium text-gray-900 line-through opacity-60" data-bind="task.name">Read Chapter 5</h3>
+                                <div class="flex items-center space-x-2 mt-1">
+                                    <span class="difficulty-badge px-2 py-1 text-xs rounded-full bg-green-100 text-green-800" data-bind="task.difficulty">Easy</span>
+                                    <span class="text-sm text-gray-500" data-bind="task.createdAt">1 day ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="delete-task text-red-500 hover:text-red-700 p-2">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="task-item bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between" data-mock="true">
+                        <div class="flex items-center space-x-4">
+                            <input type="checkbox" class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary">
+                            <div>
+                                <h3 class="font-medium text-gray-900" data-bind="task.name">Project Research</h3>
+                                <div class="flex items-center space-x-2 mt-1">
+                                    <span class="difficulty-badge px-2 py-1 text-xs rounded-full bg-red-100 text-red-800" data-bind="task.difficulty">Hard</span>
+                                    <span class="text-sm text-gray-500" data-bind="task.createdAt">3 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="delete-task text-red-500 hover:text-red-700 p-2">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: TasksTab -->
+
+        <!-- @COMPONENT: NotesTab -->
+        <div id="notes-tab" class="tab-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900">Study Notes</h2>
+                    <button id="add-note-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Note</span>
+                    </button>
+                </div>
+                
+                <!-- Add Note Form -->
+                <div id="add-note-form" class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 hidden">
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Note Title</label>
+                            <input type="text" id="note-title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter note title">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                            <textarea id="note-content" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Write your note here..."></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Reminder Date</label>
+                                <input type="date" id="reminder-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Reminder Time</label>
+                                <input type="time" id="reminder-time" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button type="submit" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">Save Note</button>
+                            <button type="button" id="cancel-note" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Notes Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- @MAP: notes.map(note => ( -->
+                    <div class="note-card bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow" data-mock="true">
+                        <div class="flex items-start justify-between mb-3">
+                            <h3 class="font-semibold text-gray-900" data-bind="note.title">JavaScript Concepts</h3>
+                            <button class="delete-note text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3" data-bind="note.content">Important concepts: closures, hoisting, async/await. Remember to practice with examples.</p>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span data-bind="note.createdAt">2 hours ago</span>
+                            <div class="flex items-center space-x-1">
+                                <i class="fas fa-bell text-yellow-500"></i>
+                                <span data-bind="note.reminder">Tomorrow 9:00 AM</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="note-card bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow" data-mock="true">
+                        <div class="flex items-start justify-between mb-3">
+                            <h3 class="font-semibold text-gray-900" data-bind="note.title">Math Formulas</h3>
+                            <button class="delete-note text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3" data-bind="note.content">Quadratic formula: x = (-b ± √(b²-4ac)) / 2a. Integration by parts formula.</p>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span data-bind="note.createdAt">1 day ago</span>
+                            <div class="flex items-center space-x-1">
+                                <i class="fas fa-bell text-yellow-500"></i>
+                                <span data-bind="note.reminder">Dec 15, 3:00 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: NotesTab -->
+
+        <!-- @COMPONENT: FAQTab -->
+        <div id="faq-tab" class="tab-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
+                
+                <div class="space-y-6">
+                    <!-- FAQ Topic 1: Getting Started -->
+                    <div class="faq-topic bg-white rounded-xl shadow-sm border border-gray-100">
+                        <button class="faq-topic-header w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                            <span class="text-lg font-semibold text-gray-900">Getting Started</span>
+                            <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div class="faq-questions hidden px-6 pb-4 space-y-3">
+                            <div class="faq-question border-l-4 border-primary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How do I create my first study session?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    To create your first study session, click on the timer, set your desired duration using the preset buttons or custom time, and click "Start" to begin your focused study time.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-primary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">What is the Pomodoro Technique?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    The Pomodoro Technique is a time management method that uses 25-minute focused work intervals followed by short breaks to enhance productivity and maintain concentration.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-primary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How do I add my first task?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Navigate to the Tasks tab, click "Add Task", enter your task name, select the difficulty level (easy, medium, or hard), and click "Add Task" to save it.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-primary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I customize timer durations?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Yes, you can use the preset buttons (15m, 25m, 45m, 60m) or click "Set" to enter a custom duration that fits your study preferences.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-primary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Is StudyFlow free to use?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    StudyFlow offers a free tier with core features. Premium features like advanced analytics and unlimited storage are available with a subscription.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-primary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How do I sync across devices?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Create an account and sign in on all your devices. Your tasks, notes, and progress will automatically sync across all platforms.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-primary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">What browsers are supported?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    StudyFlow works on all modern browsers including Chrome, Firefox, Safari, and Edge. We recommend keeping your browser updated for the best experience.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Topic 2: Timer & Pomodoro -->
+                    <div class="faq-topic bg-white rounded-xl shadow-sm border border-gray-100">
+                        <button class="faq-topic-header w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                            <span class="text-lg font-semibold text-gray-900">Timer & Pomodoro Features</span>
+                            <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div class="faq-questions hidden px-6 pb-4 space-y-3">
+                            <div class="faq-question border-l-4 border-accent pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How do breaks work in Pomodoro sessions?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    After each 25-minute focus session, take a 5-minute break. After every 4 sessions, take a longer 15-30 minute break to recharge.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-accent pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I pause the timer?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Yes, click the pause button to temporarily stop the timer. However, for best results with the Pomodoro Technique, try to complete sessions without interruption.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-accent pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Will I get notifications when time is up?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Yes, StudyFlow will send browser notifications when your study session or break time ends. Make sure to allow notifications for the best experience.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-accent pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Does the timer continue if I close the browser?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    The timer will pause if you close the browser tab. We recommend keeping the tab open or using our mobile app for continuous timing.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-accent pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I track different types of study sessions?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Currently, all sessions are tracked together. We're working on adding subject-specific tracking in future updates.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-accent pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How accurate is the timer?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Our timer is accurate to the second and uses reliable web technologies to maintain precision even during extended study sessions.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-accent pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I use custom sounds for notifications?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Custom notification sounds are planned for future releases. Currently, we use the browser's default notification sound.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Topic 3: Tasks & Productivity -->
+                    <div class="faq-topic bg-white rounded-xl shadow-sm border border-gray-100">
+                        <button class="faq-topic-header w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                            <span class="text-lg font-semibold text-gray-900">Tasks & Productivity</span>
+                            <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div class="faq-questions hidden px-6 pb-4 space-y-3">
+                            <div class="faq-question border-l-4 border-secondary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">What do difficulty levels mean?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Easy tasks are quick items (5-15 minutes), Medium tasks require moderate effort (15-45 minutes), and Hard tasks are complex projects (45+ minutes).
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-secondary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I organize tasks by subject or project?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Task categorization and project organization features are coming in our next major update. Currently, you can use prefixes in task names.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-secondary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How do I prioritize tasks?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    While we don't have explicit priority settings yet, we recommend ordering tasks by importance and tackling hard tasks during your most productive hours.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-secondary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I set deadlines for tasks?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Task deadlines are on our roadmap for future releases. For now, you can use the Notes feature to track important due dates.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-secondary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Is there a limit to how many tasks I can add?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Free accounts can have up to 50 active tasks. Premium accounts have unlimited task storage and advanced organization features.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-secondary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How does task completion tracking work?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Check off tasks as you complete them. Your progress is automatically tracked and contributes to your daily and weekly productivity statistics.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-secondary pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I recover deleted tasks?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Deleted tasks are kept in a recycle bin for 30 days before permanent deletion. Contact support if you need to recover an old task.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Topic 4: Notes & Reminders -->
+                    <div class="faq-topic bg-white rounded-xl shadow-sm border border-gray-100">
+                        <button class="faq-topic-header w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                            <span class="text-lg font-semibold text-gray-900">Notes & Reminders</span>
+                            <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div class="faq-questions hidden px-6 pb-4 space-y-3">
+                            <div class="faq-question border-l-4 border-yellow-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How do reminder notifications work?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Set custom dates and times for your notes, and StudyFlow will send browser notifications at the specified time to remind you of important information.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-yellow-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I format text in my notes?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Rich text formatting including bold, italic, bullet points, and links will be available in the next update. Currently, notes support plain text.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-yellow-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Is there a character limit for notes?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Each note can contain up to 10,000 characters. For longer content, consider breaking it into multiple related notes.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-yellow-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I attach files to notes?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    File attachments are planned for future releases. Currently, you can include links to external files or cloud storage in your notes.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-yellow-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How do I search through my notes?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    A search feature for notes and tasks is coming soon. For now, you can use your browser's find function (Ctrl+F) to search visible notes.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-yellow-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I share notes with others?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Note sharing and collaboration features are on our development roadmap. Currently, notes are private to your account.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-yellow-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">What happens if I miss a reminder?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Missed reminders will show as overdue in your dashboard. You can reschedule them or mark them as completed from your notes list.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Topic 5: Account & Progress -->
+                    <div class="faq-topic bg-white rounded-xl shadow-sm border border-gray-100">
+                        <button class="faq-topic-header w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                            <span class="text-lg font-semibold text-gray-900">Account & Progress Tracking</span>
+                            <i class="fas fa-chevron-down text-gray-400 transition-transform</i>
+                        </button>
+                        <div class="faq-questions hidden px-6 pb-4 space-y-3">
+                            <div class="faq-question border-l-4 border-purple-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How is my progress calculated?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Progress is based on completed tasks, study time, and consistency. Easy tasks give 1 point, medium tasks give 2 points, and hard tasks give 3 points.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-purple-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I export my data?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Data export functionality is available in account settings. You can export your tasks, notes, and progress data in CSV or JSON format.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-purple-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How do I add skills to my profile?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Go to your profile, click on Skills, then "Add Skill". Enter the skill name and set your current level from beginner to expert.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-purple-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">What file types can I upload for achievements?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    You can upload JPG, PNG, or PDF files up to 10MB in size. These are perfect for certificates, diplomas, or achievement screenshots.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-purple-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How do I delete my account?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Account deletion can be requested from your profile settings. All data will be permanently deleted after a 14-day grace period.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-purple-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I change my email address?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Yes, you can update your email address in profile settings. You'll need to verify the new email address before the change takes effect.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-purple-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Is my data secure?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Yes, we use industry-standard encryption and security practices. Your data is encrypted both in transit and at rest on our servers.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Topic 6: Technical Support -->
+                    <div class="faq-topic bg-white rounded-xl shadow-sm border border-gray-100">
+                        <button class="faq-topic-header w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                            <span class="text-lg font-semibold text-gray-900">Technical Support</span>
+                            <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div class="faq-questions hidden px-6 pb-4 space-y-3">
+                            <div class="faq-question border-l-4 border-red-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">The timer isn't working properly. What should I do?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Try refreshing the page and clearing your browser cache. If the issue persists, contact our support team with details about your browser and device.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-red-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">I'm not receiving notifications. How can I fix this?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Check that notifications are enabled for StudyFlow in your browser settings. Also ensure your device's "Do Not Disturb" mode isn't blocking notifications.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-red-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">My data seems to have disappeared. Can you help?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    First, try logging out and back in. If you're still missing data, contact support immediately. We keep backups and can often recover lost information.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-red-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">The website is running slowly. Is there a fix?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Slow performance can be caused by browser extensions or too many open tabs. Try using StudyFlow in an incognito window or different browser.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-red-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">I found a bug. How do I report it?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Use the Contact Us form to report bugs. Include details about what you were doing when the bug occurred, your browser, and any error messages.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-red-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">Can I use StudyFlow offline?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    StudyFlow requires an internet connection for full functionality. Limited offline features like basic timer functionality are planned for future releases.
+                                </div>
+                            </div>
+                            <div class="faq-question border-l-4 border-red-400 pl-4">
+                                <button class="text-left text-gray-700 hover:text-primary transition-colors">How do I contact technical support?</button>
+                                <div class="faq-answer hidden mt-2 text-sm text-gray-600">
+                                    Use our Contact Us form for technical issues. For urgent problems, you can also email support@studyflow.com directly with your account details.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: FAQTab -->
+
+        <!-- @COMPONENT: ContactTab -->
+        <div id="contact-tab" class="tab-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Contact Us</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <!-- Contact Information -->
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-6">Get in Touch</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-envelope text-primary text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Email Support</p>
+                                        <p class="text-gray-600">support@studyflow.com</p>
+                                        <p class="text-sm text-gray-500">We typically respond within 24 hours</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-phone text-accent text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Phone Support</p>
+                                        <p class="text-gray-600">+1 (555) 123-4567</p>
+                                        <p class="text-sm text-gray-500">Mon-Fri, 9 AM - 6 PM EST</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-map-marker-alt text-secondary text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Office Address</p>
+                                        <p class="text-gray-600">123 Innovation Drive<br>San Francisco, CA 94105</p>
+                                        <p class="text-sm text-gray-500">Visitors by appointment only</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-comments text-yellow-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Live Chat</p>
+                                        <p class="text-gray-600">Available on our website</p>
+                                        <p class="text-sm text-gray-500">Mon-Fri, 8 AM - 8 PM EST</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Social Media -->
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">Follow Us</h3>
+                            <div class="flex space-x-4">
+                                <a href="#" class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-blue-800 rounded-lg flex items-center justify-center text-white hover:bg-blue-900 transition-colors">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center text-white hover:bg-blue-800 transition-colors">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-pink-600 rounded-lg flex items-center justify-center text-white hover:bg-pink-700 transition-colors">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Form -->
+                    <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-6">Send us a Message</h3>
+                        <form class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="John">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Doe">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                <input type="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="john@example.com">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                                <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option>General Inquiry</option>
+                                    <option>Technical Support</option>
+                                    <option>Feature Request</option>
+                                    <option>Bug Report</option>
+                                    <option>Account Issues</option>
+                                    <option>Billing Question</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                                <textarea rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="How can we help you?"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: ContactTab -->
+
+        <!-- @COMPONENT: SkillsTab -->
+        <div id="skills-tab" class="profile-tab-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900">My Skills</h2>
+                    <button id="add-skill-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Skill</span>
+                    </button>
+                </div>
+                
+                <!-- Add Skill Form -->
+                <div id="add-skill-form" class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 hidden">
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Skill Name</label>
+                            <input type="text" id="skill-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., JavaScript, Mathematics, Writing">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Skill Level</label>
+                            <select id="skill-level" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                                <option value="expert">Expert</option>
+                            </select>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button type="submit" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">Add Skill</button>
+                            <button type="button" id="cancel-skill" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Skills Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- @MAP: skills.map(skill => ( -->
+                    <div class="skill-card bg-white rounded-xl p-6 shadow-sm border border-gray-100" data-mock="true">
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h3 class="font-semibold text-gray-900" data-bind="skill.name">JavaScript</h3>
+                                <span class="skill-level text-sm px-2 py-1 rounded-full bg-green-100 text-green-800" data-bind="skill.level">Advanced</span>
+                            </div>
+                            <button class="delete-skill text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                            <div class="bg-accent h-2 rounded-full" style="width: 85%" data-bind="skill.progress"></div>
+                        </div>
+                        <p class="text-xs text-gray-500" data-bind="skill.description">85% proficiency</p>
+                    </div>
+                    
+                    <div class="skill-card bg-white rounded-xl p-6 shadow-sm border border-gray-100" data-mock="true">
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h3 class="font-semibold text-gray-900" data-bind="skill.name">React</h3>
+                                <span class="skill-level text-sm px-2 py-1 rounded-full bg-blue-100 text-blue-800" data-bind="skill.level">Intermediate</span>
+                            </div>
+                            <button class="delete-skill text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                            <div class="bg-primary h-2 rounded-full" style="width: 65%" data-bind="skill.progress"></div>
+                        </div>
+                        <p class="text-xs text-gray-500" data-bind="skill.description">65% proficiency</p>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: SkillsTab -->
+
+        <!-- @COMPONENT: AchievementsTab -->
+        <div id="achievements-tab" class="profile-tab-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900">My Achievements</h2>
+                    <button id="add-achievement-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Achievement</span>
+                    </button>
+                </div>
+                
+                <!-- Add Achievement Form -->
+                <div id="add-achievement-form" class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6 hidden">
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Achievement Name</label>
+                            <input type="text" id="achievement-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., JavaScript Certification, Completed React Course">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea id="achievement-description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Describe your achievement..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Certificate/Proof</label>
+                            <div class="space-y-2">
+                                <input type="file" id="achievement-file" accept=".jpg,.jpeg,.png,.pdf" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <p class="text-sm text-gray-500">Upload JPG, PNG, or PDF files up to 10MB</p>
+                                <div class="text-center text-gray-500">- OR -</div>
+                                <input type="url" id="achievement-link" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="https://example.com/certificate">
+                                <p class="text-sm text-gray-500">Provide a link to your certificate</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Achieved</label>
+                            <input type="date" id="achievement-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div class="flex space-x-3">
+                            <button type="submit" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">Add Achievement</button>
+                            <button type="button" id="cancel-achievement" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Achievements Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- @MAP: achievements.map(achievement => ( -->
+                    <div class="achievement-card bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow" data-mock="true">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-trophy text-yellow-600 text-xl"></i>
+                            </div>
+                            <button class="delete-achievement text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                        <!-- Professional certificate with elegant design and company branding -->
+                        <img src="https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200" 
+                             alt="Achievement certificate" class="w-full h-32 object-cover rounded-lg mb-4">
+                        <h3 class="font-semibold text-gray-900 mb-2" data-bind="achievement.name">JavaScript ES6 Certification</h3>
+                        <p class="text-gray-600 text-sm mb-3 line-clamp-2" data-bind="achievement.description">Completed comprehensive JavaScript ES6 course covering modern syntax, promises, and async programming.</p>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span data-bind="achievement.date">Dec 10, 2023</span>
+                            <a href="#" class="text-primary hover:underline">View Certificate</a>
+                        </div>
+                    </div>
+                    
+                    <div class="achievement-card bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow" data-mock="true">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-medal text-blue-600 text-xl"></i>
+                            </div>
+                            <button class="delete-achievement text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                        <!-- Modern diploma or degree certificate with formal layout -->
+                        <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200" 
+                             alt="Achievement diploma" class="w-full h-32 object-cover rounded-lg mb-4">
+                        <h3 class="font-semibold text-gray-900 mb-2" data-bind="achievement.name">React Developer Bootcamp</h3>
+                        <p class="text-gray-600 text-sm mb-3 line-clamp-2" data-bind="achievement.description">Successfully completed 12-week intensive React development bootcamp with hands-on projects.</p>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span data-bind="achievement.date">Nov 28, 2023</span>
+                            <a href="#" class="text-primary hover:underline">View Certificate</a>
+                        </div>
+                    </div>
+                    
+                    <div class="achievement-card bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow" data-mock="true">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-award text-green-600 text-xl"></i>
+                            </div>
+                            <button class="delete-achievement text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                        <!-- Professional online course completion certificate -->
+                        <img src="https://images.unsplash.com/photo-1577985759186-0854dfd3f218?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200" 
+                             alt="Course completion certificate" class="w-full h-32 object-cover rounded-lg mb-4">
+                        <h3 class="font-semibold text-gray-900 mb-2" data-bind="achievement.name">AWS Cloud Practitioner</h3>
+                        <p class="text-gray-600 text-sm mb-3 line-clamp-2" data-bind="achievement.description">Earned AWS Certified Cloud Practitioner certification demonstrating cloud computing knowledge.</p>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span data-bind="achievement.date">Oct 15, 2023</span>
+                            <a href="#" class="text-primary hover:underline">View Certificate</a>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: AchievementsTab -->
+
+        <!-- @COMPONENT: ProgressTab -->
+        <div id="progress-tab" class="profile-tab-content hidden">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8">My Progress</h2>
+                
+                <!-- Progress Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-primary/10 rounded-lg">
+                                <i class="fas fa-chart-line text-primary text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Total Points</p>
+                                <p class="text-2xl font-bold text-gray-900" data-mock="true">1,247</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-accent/10 rounded-lg">
+                                <i class="fas fa-tasks text-accent text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Tasks Completed</p>
+                                <p class="text-2xl font-bold text-gray-900" data-mock="true">186</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-secondary/10 rounded-lg">
+                                <i class="fas fa-clock text-secondary text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Study Hours</p>
+                                <p class="text-2xl font-bold text-gray-900" data-mock="true">42.5</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-yellow-100 rounded-lg">
+                                <i class="fas fa-fire text-yellow-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Current Streak</p>
+                                <p class="text-2xl font-bold text-gray-900" data-mock="true">15 days</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Points Progress</h3>
+                        <canvas id="pointsChart" width="400" height="300"></canvas>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Tasks Completed</h3>
+                        <canvas id="tasksChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Weekly Progress -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mt-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">This Week's Progress</h3>
+                    <div class="grid grid-cols-7 gap-2">
+                        <div class="text-center" data-mock="true">
+                            <div class="text-xs text-gray-500 mb-2">Mon</div>
+                            <div class="w-8 h-20 bg-primary/20 rounded-lg mx-auto relative">
+                                <div class="absolute bottom-0 w-full bg-primary rounded-lg" style="height: 60%"></div>
+                            </div>
+                            <div class="text-xs text-gray-600 mt-1">8 tasks</div>
+                        </div>
+                        <div class="text-center" data-mock="true">
+                            <div class="text-xs text-gray-500 mb-2">Tue</div>
+                            <div class="w-8 h-20 bg-primary/20 rounded-lg mx-auto relative">
+                                <div class="absolute bottom-0 w-full bg-primary rounded-lg" style="height: 80%"></div>
+                            </div>
+                            <div class="text-xs text-gray-600 mt-1">12 tasks</div>
+                        </div>
+                        <div class="text-center" data-mock="true">
+                            <div class="text-xs text-gray-500 mb-2">Wed</div>
+                            <div class="w-8 h-20 bg-primary/20 rounded-lg mx-auto relative">
+                                <div class="absolute bottom-0 w-full bg-primary rounded-lg" style="height: 45%"></div>
+                            </div>
+                            <div class="text-xs text-gray-600 mt-1">6 tasks</div>
+                        </div>
+                        <div class="text-center" data-mock="true">
+                            <div class="text-xs text-gray-500 mb-2">Thu</div>
+                            <div class="w-8 h-20 bg-primary/20 rounded-lg mx-auto relative">
+                                <div class="absolute bottom-0 w-full bg-primary rounded-lg" style="height: 95%"></div>
+                            </div>
+                            <div class="text-xs text-gray-600 mt-1">15 tasks</div>
+                        </div>
+                        <div class="text-center" data-mock="true">
+                            <div class="text-xs text-gray-500 mb-2">Fri</div>
+                            <div class="w-8 h-20 bg-primary/20 rounded-lg mx-auto relative">
+                                <div class="absolute bottom-0 w-full bg-primary rounded-lg" style="height: 70%"></div>
+                            </div>
+                            <div class="text-xs text-gray-600 mt-1">10 tasks</div>
+                        </div>
+                        <div class="text-center" data-mock="true">
+                            <div class="text-xs text-gray-500 mb-2">Sat</div>
+                            <div class="w-8 h-20 bg-primary/20 rounded-lg mx-auto relative">
+                                <div class="absolute bottom-0 w-full bg-primary rounded-lg" style="height: 30%"></div>
+                            </div>
+                            <div class="text-xs text-gray-600 mt-1">4 tasks</div>
+                        </div>
+                        <div class="text-center" data-mock="true">
+                            <div class="text-xs text-gray-500 mb-2">Sun</div>
+                            <div class="w-8 h-20 bg-primary/20 rounded-lg mx-auto relative">
+                                <div class="absolute bottom-0 w-full bg-primary rounded-lg" style="height: 85%"></div>
+                            </div>
+                            <div class="text-xs text-gray-600 mt-1">13 tasks</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: ProgressTab -->
+    </main>
+    <!-- @END_COMPONENT: MainContent -->
+
+    <!-- Mobile Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-40">
+        <div class="grid grid-cols-5 h-16">
+            <button class="nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 hover:text-primary" data-tab="home">
+                <i class="fas fa-home text-lg"></i>
+                <span class="text-xs">Home</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 hover:text-primary" data-tab="tasks">
+                <i class="fas fa-tasks text-lg"></i>
+                <span class="text-xs">Tasks</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 hover:text-primary" data-tab="notes">
+                <i class="fas fa-sticky-note text-lg"></i>
+                <span class="text-xs">Notes</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 hover:text-primary" data-tab="faq">
+                <i class="fas fa-question-circle text-lg"></i>
+                <span class="text-xs">FAQ</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center justify-center space-y-1 text-gray-600 hover:text-primary" data-tab="contact">
+                <i class="fas fa-envelope text-lg"></i>
+                <span class="text-xs">Contact</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        // Global state management
+        (function() {
+            let currentTab = 'home';
+            let currentProfileTab = 'skills';
+            let isLoggedIn = false;
+            let userData = null;
+            let timerState = {
+                minutes: 25,
+                seconds: 0,
+                isRunning: false,
+                interval: null
+            };
+
+            // DOM Elements
+            const loginBtn = document.getElementById('login-btn');
+            const profileIcon = document.getElementById('profile-icon');
+            const authModal = document.getElementById('auth-modal');
+            const profileSidebar = document.getElementById('profile-sidebar');
+            const navBtns = document.querySelectorAll('.nav-btn');
+            const profileNavBtns = document.querySelectorAll('.profile-nav-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const profileTabContents = document.querySelectorAll('.profile-tab-content');
+
+            // Initialize application
+            function init() {
+                setupEventListeners();
+                showTab('home');
+                initializeTimer();
+                initializeFAQ();
+                initializeCharts();
+            }
+
+            // Event Listeners Setup
+            function setupEventListeners() {
+                // Navigation
+                navBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const tab = btn.getAttribute('data-tab');
+                        showTab(tab);
+                        updateActiveNav(btn);
+                    });
+                });
+
+                // Profile Navigation
+                profileNavBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const tab = btn.getAttribute('data-profile-tab');
+                        showProfileTab(tab);
+                        updateActiveProfileNav(btn);
+                    });
+                });
+
+                // Authentication
+                loginBtn?.addEventListener('click', () => {
+                    authModal.classList.remove('hidden');
+                });
+
+                profileIcon?.addEventListener('click', () => {
+                    if (isLoggedIn) {
+                        profileSidebar.classList.toggle('translate-x-full');
+                    }
+                });
+
+                // Modal controls
+                document.getElementById('close-modal')?.addEventListener('click', () => {
+                    authModal.classList.add('hidden');
+                });
+
+                document.getElementById('close-sidebar')?.addEventListener('click', () => {
+                    profileSidebar.classList.add('translate-x-full');
+                });
+
+                // Google Sign-in simulation
+                document.getElementById('google-signin')?.addEventListener('click', simulateLogin);
+
+                // Auth form
+                document.getElementById('auth-form')?.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    simulateLogin();
+                });
+
+                // Logout
+                document.getElementById('logout-btn')?.addEventListener('click', () => {
+                    logout();
+                });
+
+                // Timer controls
+                setupTimerControls();
+                
+                // Task management
+                setupTaskManagement();
+                
+                // Note management
+                setupNoteManagement();
+                
+                // Skills management
+                setupSkillsManagement();
+                
+                // Achievements management
+                setupAchievementsManagement();
+            }
+
+            // Navigation Functions
+            function showTab(tabName) {
+                currentTab = tabName;
+                tabContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById(`${tabName}-tab`)?.classList.remove('hidden');
+            }
+
+            function showProfileTab(tabName) {
+                currentProfileTab = tabName;
+                profileTabContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById(`${tabName}-tab`)?.classList.remove('hidden');
+            }
+
+            function updateActiveNav(activeBtn) {
+                navBtns.forEach(btn => {
+                    btn.classList.remove('text-primary');
+                    btn.classList.add('text-gray-700');
+                });
+                activeBtn.classList.remove('text-gray-700');
+                activeBtn.classList.add('text-primary');
+            }
+
+            function updateActiveProfileNav(activeBtn) {
+                profileNavBtns.forEach(btn => {
+                    btn.classList.remove('bg-gray-100');
+                });
+                activeBtn.classList.add('bg-gray-100');
+            }
+
+            // Authentication Functions
+            function simulateLogin() {
+                // TODO: Implement Google OAuth and form authentication
+                isLoggedIn = true;
+                userData = {
+                    name: 'John Doe',
+                    email: 'john@example.com',
+                    avatar: null
+                };
+                
+                loginBtn.style.display = 'none';
+                profileIcon.classList.remove('hidden');
+                profileIcon.classList.add('flex');
+                authModal.classList.add('hidden');
+                
+                // Show success message
+                showNotification('Successfully logged in!', 'success');
+            }
+
+            function logout() {
+                isLoggedIn = false;
+                userData = null;
+                
+                loginBtn.style.display = 'block';
+                profileIcon.classList.add('hidden');
+                profileIcon.classList.remove('flex');
+                profileSidebar.classList.add('translate-x-full');
+                
+                showNotification('Successfully logged out!', 'info');
+            }
+
+            // Timer Functions
+            function initializeTimer() {
+                updateTimerDisplay();
+            }
+
+            function setupTimerControls() {
+                // Timer preset buttons
+                document.querySelectorAll('.timer-preset').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const minutes = parseInt(btn.getAttribute('data-minutes'));
+                        setTimer(minutes, 0);
+                        updatePresetButtons(btn);
+                    });
+                });
+
+                // Timer control buttons
+                document.getElementById('timer-start')?.addEventListener('click', startTimer);
+                document.getElementById('timer-pause')?.addEventListener('click', pauseTimer);
+                document.getElementById('timer-stop')?.addEventListener('click', stopTimer);
+                document.getElementById('timer-set')?.addEventListener('click', showTimerSettings);
+            }
+
+            function setTimer(minutes, seconds) {
+                timerState.minutes = minutes;
+                timerState.seconds = seconds;
+                updateTimerDisplay();
+            }
+
+            function updateTimerDisplay() {
+                const display = document.getElementById('timer-display');
+                if (display) {
+                    const mins = String(timerState.minutes).padStart(2, '0');
+                    const secs = String(timerState.seconds).padStart(2, '0');
+                    display.textContent = `${mins}:${secs}`;
+                }
+            }
+
+            function updatePresetButtons(activeBtn) {
+                document.querySelectorAll('.timer-preset').forEach(btn => {
+                    btn.classList.remove('bg-primary', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-700');
+                });
+                activeBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                activeBtn.classList.add('bg-primary', 'text-white');
+            }
+
+            function startTimer() {
+                if (!timerState.isRunning) {
+                    timerState.isRunning = true;
+                    document.getElementById('timer-start').classList.add('hidden');
+                    document.getElementById('timer-pause').classList.remove('hidden');
+                    
+                    timerState.interval = setInterval(() => {
+                        if (timerState.seconds === 0) {
+                            if (timerState.minutes === 0) {
+                                // Timer finished
+                                stopTimer();
+                                showNotification('Time\'s up! Great work!', 'success');
+                                // TODO: Play notification sound
+                                return;
+                            }
+                            timerState.minutes--;
+                            timerState.seconds = 59;
+                        } else {
+                            timerState.seconds--;
+                        }
+                        updateTimerDisplay();
+                    }, 1000);
+                }
+            }
+
+            function pauseTimer() {
+                timerState.isRunning = false;
+                clearInterval(timerState.interval);
+                document.getElementById('timer-start').classList.remove('hidden');
+                document.getElementById('timer-pause').classList.add('hidden');
+            }
+
+            function stopTimer() {
+                timerState.isRunning = false;
+                clearInterval(timerState.interval);
+                document.getElementById('timer-start').classList.remove('hidden');
+                document.getElementById('timer-pause').classList.add('hidden');
+                
+                // Reset to default or last set time
+                const activePreset = document.querySelector('.timer-preset.bg-primary');
+                if (activePreset) {
+                    const minutes = parseInt(activePreset.getAttribute('data-minutes'));
+                    setTimer(minutes, 0);
+                } else {
+                    setTimer(25, 0); // Default pomodoro time
+                }
+            }
+
+            function showTimerSettings() {
+                const minutes = prompt('Enter minutes:', timerState.minutes);
+                if (minutes !== null && !isNaN(minutes) && minutes > 0) {
+                    setTimer(parseInt(minutes), 0);
+                    // Remove active state from preset buttons
+                    document.querySelectorAll('.timer-preset').forEach(btn => {
+                        btn.classList.remove('bg-primary', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+                }
+            }
+
+            // Task Management Functions
+            function setupTaskManagement() {
+                document.getElementById('add-task-btn')?.addEventListener('click', () => {
+                    document.getElementById('add-task-form').classList.remove('hidden');
+                });
+
+                document.getElementById('cancel-task')?.addEventListener('click', () => {
+                    document.getElementById('add-task-form').classList.add('hidden');
+                });
+
+                // Delete task buttons
+                document.querySelectorAll('.delete-task').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (confirm('Are you sure you want to delete this task?')) {
+                            e.target.closest('.task-item').remove();
+                            showNotification('Task deleted successfully!', 'info');
+                        }
+                    });
+                });
+
+                // Task completion checkboxes
+                document.querySelectorAll('.task-item input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const taskItem = e.target.closest('.task-item');
+                        const taskName = taskItem.querySelector('h3');
+                        
+                        if (e.target.checked) {
+                            taskName.classList.add('line-through', 'opacity-60');
+                            showNotification('Task completed! Well done!', 'success');
+                            // TODO: Update progress and points
+                        } else {
+                            taskName.classList.remove('line-through', 'opacity-60');
+                        }
+                    });
+                });
+            }
+
+            // Note Management Functions
+            function setupNoteManagement() {
+                document.getElementById('add-note-btn')?.addEventListener('click', () => {
+                    document.getElementById('add-note-form').classList.remove('hidden');
+                });
+
+                document.getElementById('cancel-note')?.addEventListener('click', () => {
+                    document.getElementById('add-note-form').classList.add('hidden');
+                });
+
+                // Delete note buttons
+                document.querySelectorAll('.delete-note').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (confirm('Are you sure you want to delete this note?')) {
+                            e.target.closest('.note-card').remove();
+                            showNotification('Note deleted successfully!', 'info');
+                        }
+                    });
+                });
+            }
+
+            // Skills Management Functions
+            function setupSkillsManagement() {
+                document.getElementById('add-skill-btn')?.addEventListener('click', () => {
+                    document.getElementById('add-skill-form').classList.remove('hidden');
+                });
+
+                document.getElementById('cancel-skill')?.addEventListener('click', () => {
+                    document.getElementById('add-skill-form').classList.add('hidden');
+                });
+
+                // Delete skill buttons
+                document.querySelectorAll('.delete-skill').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (confirm('Are you sure you want to delete this skill?')) {
+                            e.target.closest('.skill-card').remove();
+                            showNotification('Skill deleted successfully!', 'info');
+                        }
+                    });
+                });
+            }
+
+            // Achievements Management Functions
+            function setupAchievementsManagement() {
+                document.getElementById('add-achievement-btn')?.addEventListener('click', () => {
+                    document.getElementById('add-achievement-form').classList.remove('hidden');
+                });
+
+                document.getElementById('cancel-achievement')?.addEventListener('click', () => {
+                    document.getElementById('add-achievement-form').classList.add('hidden');
+                });
+
+                // Delete achievement buttons
+                document.querySelectorAll('.delete-achievement').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (confirm('Are you sure you want to delete this achievement?')) {
+                            e.target.closest('.achievement-card').remove();
+                            showNotification('Achievement deleted successfully!', 'info');
+                        }
+                    });
+                });
+
+                // File upload handling
+                document.getElementById('achievement-file')?.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        if (file.size > 10 * 1024 * 1024) {
+                            alert('File size must be less than 10MB');
+                            e.target.value = '';
+                            return;
+                        }
+                        
+                        const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+                        if (!allowedTypes.includes(file.type)) {
+                            alert('Only JPG, PNG, and PDF files are allowed');
+                            e.target.value = '';
+                            return;
+                        }
+                        
+                        // TODO: Handle file upload to server
+                        showNotification('File ready for upload!', 'info');
+                    }
+                });
+            }
+
+            // FAQ Functions
+            function initializeFAQ() {
+                // Topic headers
+                document.querySelectorAll('.faq-topic-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const questions = header.nextElementSibling;
+                        const icon = header.querySelector('i');
+                        
+                        questions.classList.toggle('hidden');
+                        icon.classList.toggle('fa-chevron-down');
+                        icon.classList.toggle('fa-chevron-up');
+                    });
+                });
+
+                // Individual questions
+                document.querySelectorAll('.faq-question button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const answer = btn.nextElementSibling;
+                        answer.classList.toggle('hidden');
+                    });
+                });
+            }
+
+            // Charts Initialization
+            function initializeCharts() {
+                // Wait for DOM to be fully loaded
+                setTimeout(() => {
+                    initPointsChart();
+                    initTasksChart();
+                }, 100);
+            }
+
+            function initPointsChart() {
+                const ctx = document.getElementById('pointsChart');
+                if (!ctx) return;
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Points Earned',
+                            data: [65, 85, 45, 95, 70, 30, 85],
+                            borderColor: '#3B82F6',
+                            backgroundColor: '#3B82F6',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            function initTasksChart() {
+                const ctx = document.getElementById('tasksChart');
+                if (!ctx) return;
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Easy', 'Medium', 'Hard'],
+                        datasets: [{
+                            data: [45, 30, 25],
+                            backgroundColor: ['#10B981', '#F59E0B', '#EF4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Utility Functions
+            function showNotification(message, type = 'info') {
+                // TODO: Implement proper notification system
+                console.log(`${type.toUpperCase()}: ${message}`);
+                
+                // Simple alert for now - replace with proper toast notification
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 ${
+                    type === 'success' ? 'bg-green-500' : 
+                    type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                }`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+
+            // Initialize the application
+            init();
+        })();
+    </script>
+</body>
+</html>
